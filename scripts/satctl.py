@@ -13,6 +13,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+__version__ = "1.0.0"
+
 AZ_RANGE = (0.0, 450.0)  # Yaesu G-5500 class rotators allow 450 deg azimuth
 EL_RANGE = (0.0, 180.0)
 TIMEOUT = 10
@@ -152,6 +154,7 @@ def main(argv=None):
     p = argparse.ArgumentParser(description="Control a CSN Technologies S.A.T. antenna tracker.")
     p.add_argument("--host", default=os.environ.get("CSN_SAT_HOST"),
                    help="S.A.T. IP or hostname (default: $CSN_SAT_HOST)")
+    p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--json", action="store_true", help="machine-readable output")
     sub = p.add_subparsers(dest="action", required=True)

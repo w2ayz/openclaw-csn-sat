@@ -1,0 +1,22 @@
+# Changelog
+
+All notable changes to this project are documented here.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
+project uses [Semantic Versioning](https://semver.org/).
+
+## [1.0.0] - 2026-10-02
+
+### Added
+
+- `csn-sat` OpenClaw skill (`SKILL.md`) with gating on `python3` and host
+  configuration through `skills.entries.csn-sat.env.CSN_SAT_HOST`.
+- `scripts/satctl.py` CLI (Python standard library only) with commands
+  `status`, `goto`, `track`, `sats`, `stop`, `park`, `ready`, `sim` and `--version`.
+- `--json` output on every command.
+- Satellite lookup by name, partial name or NORAD catalog number against the
+  list loaded on the device.
+- AZ/EL range validation (0–450° / 0–180°); `goto` stops tracking first.
+- Request pacing and retry for the device's embedded web server.
+- Agent safety rules: move only on explicit request; simulation state is write-only.
+
+[1.0.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.0
