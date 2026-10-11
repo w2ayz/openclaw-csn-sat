@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] - 2026-10-11
+
+### Added
+
+- `Deployment.md`: network topologies for reaching the S.A.T. from OpenClaw —
+  same-LAN, Tailscale subnet router (recommended for a constrained LAN-local
+  device like a Raspberry Pi), SSH tunnel fallback, and running OpenClaw
+  directly on the LAN-local device — plus security notes (the S.A.T.'s HTTP
+  API has no authentication and no TLS, so it should never be exposed beyond
+  a private LAN/tailnet).
+
 ## [1.0.1] - 2026-10-11
 
 ### Added
@@ -28,5 +39,6 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.0.2]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.0

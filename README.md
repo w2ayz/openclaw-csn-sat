@@ -128,7 +128,12 @@ Notes:
 SKILL.md            OpenClaw skill definition (frontmatter + agent instructions)
 scripts/satctl.py   CLI used by the skill
 CHANGELOG.md        release history
+Deployment.md       network topologies for reaching the S.A.T. from OpenClaw, and security notes
 ```
+
+See [Deployment.md](Deployment.md) if OpenClaw doesn't run on the same network as the
+S.A.T. — it covers running on the same LAN, reaching it through a Tailscale subnet
+router or SSH tunnel, and the security considerations for each.
 
 ## License
 

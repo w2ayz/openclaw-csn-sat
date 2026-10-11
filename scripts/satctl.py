@@ -13,7 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 AZ_RANGE = (0.0, 450.0)  # Yaesu G-5500 class rotators allow 450 deg azimuth
 EL_RANGE = (0.0, 180.0)
