@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] - 2026-10-11
+
+### Security
+
+- `satctl.py`: validate the host (bare IP or hostname, optional port); reject `@`, paths,
+  queries and whitespace. Do not follow HTTP redirects.
+- `SKILL.md`: tell the agent to treat device output (e.g. satellite names from the TLE
+  file) as data, not instructions, and to use `--host` only when the user supplies it.
+
 ## [1.0.3] - 2026-10-11
 
 ### Changed
@@ -48,6 +57,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.0.4]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.4
 [1.0.3]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.3
 [1.0.2]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.1

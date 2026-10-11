@@ -7,26 +7,46 @@ Stdlib only. Host comes from --host or the CSN_SAT_HOST environment variable.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 AZ_RANGE = (0.0, 450.0)  # Yaesu G-5500 class rotators allow 450 deg azimuth
 EL_RANGE = (0.0, 180.0)
 TIMEOUT = 10
 
 
+HOST_RE = re.compile(r"^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?$")
+
+
 class SatError(Exception):
     pass
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None  # the S.A.T. never redirects; don't follow one to another host
+
+
+_opener = urllib.request.build_opener(_NoRedirect)
+
+
+def check_host(host):
+    # Bare IPv4 address or hostname with optional :port. Rejects userinfo ("@"),
+    # paths, queries and whitespace so --host can't point requests elsewhere.
+    if not HOST_RE.match(host):
+        raise SatError(f"invalid S.A.T. host '{host}': use a bare IP or hostname, optional :port")
+    return host
+
+
 class Sat:
     def __init__(self, host):
-        self.base = f"http://{host}"
+        self.base = f"http://{check_host(host)}"
 
     def _get(self, path, timeout=TIMEOUT, attempts=3):
         # The ESP-class web server drops connections that arrive back-to-back,
@@ -34,7 +54,7 @@ class Sat:
         for i in range(attempts):
             time.sleep(0.4 if i == 0 else 1.5)
             try:
-                with urllib.request.urlopen(self.base + path, timeout=timeout) as r:
+                with _opener.open(self.base + path, timeout=timeout) as r:
                     return r.read().decode("utf-8", "replace")
             except urllib.error.URLError as e:
                 if isinstance(e.reason, OSError) and not isinstance(e.reason, ConnectionError):
@@ -180,7 +200,10 @@ def main(argv=None):
     a = p.parse_args(argv)
     if not a.host:
         p.error("no S.A.T. host: pass --host or set CSN_SAT_HOST")
-    sat = Sat(a.host)
+    try:
+        sat = Sat(a.host)
+    except SatError as e:
+        p.error(str(e))
 
     def report(msg, data=None):
         if a.json:
