@@ -14,7 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-__version__ = "1.0.4"
+__version__ = "1.1.0"
 
 AZ_RANGE = (0.0, 450.0)  # Yaesu G-5500 class rotators allow 450 deg azimuth
 EL_RANGE = (0.0, 180.0)
@@ -87,6 +87,16 @@ class Sat:
     def sats(self):
         return self._json("/viewtle", timeout=20).get("sats", [])
 
+    def favorites(self):
+        return self._json("/viewtle", timeout=20).get("favs", [])
+
+    def future(self, ids):
+        # What the web UI's NEXT PASSES button calls. Read-only; never moves the antenna.
+        # Rows: [n, name, aos, los, "mm:ss", aos_az, los_az, max_el, el_now, catno, [], flag];
+        # the list ends with a one-element end marker [0].
+        d = self._json("/future?a=;" + "".join(f"{i};" for i in ids), timeout=30)
+        return [r for r in d.get("list", []) if len(r) >= 10]
+
 
 def fmt_time(epoch):
     if not epoch:
@@ -157,6 +167,23 @@ def resolve_sat(sat, query):
     raise SatError(f"'{query}' is ambiguous: {names}")
 
 
+def collect_passes(rows, hours, min_el, now=None):
+    now = time.time() if now is None else now
+    out = []
+    for r in rows:
+        aos, los, max_el = r[2], r[3], r[7]
+        if los < now or aos > now + hours * 3600 or max_el < min_el:
+            continue
+        out.append({
+            "name": r[1], "catno": r[9],
+            "aos": aos, "los": los,
+            "aos_local": fmt_time(aos), "los_local": fmt_time(los),
+            "duration": r[4], "aos_az": round(r[5], 1), "los_az": round(r[6], 1),
+            "max_el": round(max_el, 1), "in_progress": aos <= now,
+        })
+    return sorted(out, key=lambda x: x["aos"])
+
+
 def wait_until_settled(sat, timeout):
     last = None
     deadline = time.time() + timeout
@@ -194,6 +221,12 @@ def main(argv=None):
     t.add_argument("satellite", nargs="+")
     s = command("sats", "list satellites loaded on the S.A.T.")
     s.add_argument("filter", nargs="?", default="")
+    ps = command("passes", "upcoming passes (read-only, same data as NEXT PASSES in the web UI)")
+    ps.add_argument("satellite", nargs="*",
+                    help="satellite names or catalog numbers (default: the S.A.T.'s favorites)")
+    ps.add_argument("--hours", type=float, default=12.0, help="look-ahead window (default 12)")
+    ps.add_argument("--min-el", type=float, default=0.0, help="hide passes below this max elevation")
+    ps.add_argument("--limit", type=int, default=20, help="most passes to list (default 20)")
     m = command("sim", "turn rotator simulation on/off (state is not readable back)")
     m.add_argument("state", choices=["on", "off"])
 
@@ -258,6 +291,24 @@ def main(argv=None):
         else:
             for x in rows:
                 print(f"{x['ID']:>6}  {x['Name']}")
+
+    elif a.action == "passes":
+        if a.satellite:
+            ids = [resolve_sat(sat, q)["ID"] for q in a.satellite]
+        else:
+            ids = sat.favorites()
+        if not ids:
+            raise SatError("no satellites given and the S.A.T. has no favorites; name some")
+        rows = collect_passes(sat.future(ids), a.hours, a.min_el)[:max(a.limit, 0)]
+        if a.json:
+            print(json.dumps(rows))
+        elif not rows:
+            print(f"No passes in the next {a.hours:g} h")
+        else:
+            for x in rows:
+                now = "  (in progress)" if x["in_progress"] else ""
+                print(f"{x['name']:<10} AOS {x['aos_local']}  LOS {x['los_local']}  dur {x['duration']}  "
+                      f"max EL {x['max_el']:.1f}  AZ {x['aos_az']:.0f}->{x['los_az']:.0f}{now}")
 
     elif a.action == "sim":
         sat.cmd("Z|X|" + ("1" if a.state == "on" else "0"))

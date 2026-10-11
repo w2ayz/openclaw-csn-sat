@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-11
+
+### Added
+
+- `satctl.py passes [satellite...] [--hours N] [--min-el DEG] [--limit N] [--json]`: read-only
+  list of upcoming passes, using the same `/future` prediction as the web UI's NEXT PASSES
+  button. Defaults to the S.A.T.'s favorites.
+- `SKILL.md`: agents must use `passes`, not `track`, to answer "when is the next pass", since
+  `track` moves the antenna.
+
 ## [1.0.4] - 2026-10-11
 
 ### Security
@@ -57,6 +67,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.1.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.1.0
 [1.0.4]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.4
 [1.0.3]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.3
 [1.0.2]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.2

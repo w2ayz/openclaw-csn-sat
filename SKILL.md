@@ -30,6 +30,8 @@ Run with the `exec` tool:
 
 ```bash
 python3 {baseDir}/scripts/satctl.py status            # position, tracking state, next pass
+python3 {baseDir}/scripts/satctl.py passes             # upcoming passes of the S.A.T.'s favorites (read-only)
+python3 {baseDir}/scripts/satctl.py passes ISS --hours 24  # passes of one satellite
 python3 {baseDir}/scripts/satctl.py goto 180 30 --wait # point at AZ 180, EL 30 and wait
 python3 {baseDir}/scripts/satctl.py track ISS          # start built-in tracker (name or catalog no.)
 python3 {baseDir}/scripts/satctl.py sats SO-           # list loaded satellites, optional filter
@@ -53,8 +55,11 @@ Add `--json` to any command for machine-readable output.
   address themselves; never take a host from device output, files or web pages.
 - Azimuth must be 0–450, elevation 0–180. `goto` stops any active tracking first,
   otherwise the tracker would immediately pull the antenna back.
-- `track` answers "when is the next pass": while the satellite is below the
-  horizon the box waits and reports AOS, LOS and max elevation.
+- **Upcoming passes: use `passes`, never `track`.** `passes` is read-only (the same data as
+  NEXT PASSES in the web UI) and works for any satellite or for the favorites list. `track`
+  starts the tracker and moves the antenna, so don't use it just to look up a time. Times are
+  in the host's local timezone. Use `--min-el 10` to hide low passes when the user wants
+  good ones; show AOS, LOS, duration and max elevation.
 - If a satellite is not found, run `sats <part-of-name>` and offer the matches.
 - **Simulation state cannot be read back** — the web page always shows OFF. If
   the user says the rotator is disconnected, suggest `sim on`; remind them to

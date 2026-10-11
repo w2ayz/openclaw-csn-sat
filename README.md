@@ -34,7 +34,9 @@ openclaw skills list | grep csn-sat
 Start a new session (`/new`) and ask things like:
 
 - *"Where is the antenna pointing?"*
-- *"Track the ISS. When is the next pass?"*
+- *"What satellite passes are coming up?"*
+- *"When is the next ISS pass?"*
+- *"Track the ISS."*
 - *"Point the antenna at azimuth 180, elevation 30."*
 - *"Park the rotator."*
 - *"The rotator is disconnected, turn on simulation."*
@@ -47,6 +49,8 @@ To update, run the install command again. Git installs don't auto-update.
 export CSN_SAT_HOST=192.168.x.x        # or pass --host on each call
 
 scripts/satctl.py status               # position, tracking state, next pass
+scripts/satctl.py passes               # upcoming passes of the favorites (read-only)
+scripts/satctl.py passes ISS --hours 24 --min-el 10
 scripts/satctl.py goto 180 30 --wait   # point and wait until the rotator settles
 scripts/satctl.py track ISS            # satellite name or NORAD catalog number
 scripts/satctl.py sats SO-             # list loaded satellites, optional filter
@@ -56,6 +60,11 @@ scripts/satctl.py ready                # configured ready position
 scripts/satctl.py sim on               # simulate a rotator (none attached)
 scripts/satctl.py --version
 ```
+
+`passes` is read-only: it asks the S.A.T. for the same prediction as the **NEXT PASSES**
+button in its web UI (`GET /future?a=;<catalog no.>;...`) and never moves the antenna. With no
+satellite named it uses the favorites configured on the S.A.T. Times are shown in the local
+timezone of the machine running the CLI.
 
 Add `--json` to any command for machine-readable output. Errors go to stderr with
 exit code 1.
@@ -109,6 +118,7 @@ every action is `GET /cmd?a=<pipe-separated command>`, and state comes from
 |---|---|
 | Point AZ/EL | `P\|az\|el\|` |
 | Track satellite | `U\|<catalog no.>` |
+| Upcoming passes (read-only) | `GET /future?a=;<catalog no.>;...` |
 | Stop | `S\|X` |
 | Park / Ready | `z` / `y` |
 | Simulation on / off | `Z\|X\|1` / `Z\|X\|0` |
