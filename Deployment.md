@@ -38,14 +38,14 @@ flowchart LR
         A["OpenClaw host<br/>(csn-sat skill)"]
     end
     subgraph LAN["S.A.T.'s LAN"]
-        R["pi-sat-controller<br/>(subnet router only —<br/>no OpenClaw installed)"]
+        R["Tailnet-LAN-SAT-Router<br/>(subnet router only —<br/>no OpenClaw installed)"]
         B["S.A.T."]
     end
     A -->|"Tailscale"| R
     R -->|"http:// (plain LAN)"| B
 ```
 
-Setup, on the LAN-local device (`pi-sat-controller` below):
+Setup, on the LAN-local device (`Tailnet-LAN-SAT-Router` below):
 
 ```bash
 # one-time: enable IP forwarding, persisted across reboots
@@ -56,7 +56,7 @@ sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
 sudo tailscale up --advertise-routes=<SAT_LAN_IP>/32 --accept-routes
 ```
 
-Then, in the Tailscale admin console (**Machines → pi-sat-controller → Edit route
+Then, in the Tailscale admin console (**Machines → Tailnet-LAN-SAT-Router → Edit route
 settings**), approve the advertised `/32` route. Once approved, any tailnet node with
 route-accepting enabled (`tailscale up --accept-routes`, or `RouteAll` in its prefs) can
 reach the S.A.T. directly:
@@ -108,6 +108,33 @@ the full agent runtime (model calls, session state, any other skills you've enab
 whatever hardware that device has. On something CPU-constrained like a Raspberry Pi 4,
 this is usually the wrong trade — prefer §2 and keep that device doing nothing but
 routing.
+
+## Using the S.A.T. web UI
+
+The S.A.T. serves its own control page on port 80. It is the same page the skill's API
+calls were taken from, and it is the place for settings the skill deliberately leaves
+alone: reboot, firmware, WiFi, calibration, rig and TLE source configuration.
+
+Open it in a browser from any machine that can reach the S.A.T.'s IP:
+
+```text
+http://<SAT_LAN_IP>/
+```
+
+- **Same LAN:** works directly.
+- **Tailscale subnet router (§2):** works from any tailnet device that accepts subnet
+  routes (on macOS enable "Use Tailscale subnets"; elsewhere `tailscale up --accept-routes`).
+  The Pi only forwards packets; the page is served by the S.A.T. itself, not by the Pi.
+- **SSH tunnel (§3):** open `http://localhost:8080/`.
+
+Notes:
+
+- Use plain `http://`. The device has no TLS, and some browsers silently upgrade a typed
+  address to `https://`, which will fail.
+- There is no login. Anyone who can open the page can move the antenna.
+- The embedded web server drops requests that arrive back-to-back. Avoid driving the
+  antenna from the web UI and the skill at the same time.
+- The page always shows simulation as OFF, whatever the real state (see Security notes).
 
 ## Security notes
 

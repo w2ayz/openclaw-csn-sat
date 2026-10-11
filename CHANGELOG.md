@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.3] - 2026-10-11
+
+### Changed
+
+- `Deployment.md`: add a "Using the S.A.T. web UI" section (browser access over LAN,
+  Tailscale subnet route and SSH tunnel; plain http only; no login).
+- `Deployment.md`: use the generic name `Tailnet-LAN-SAT-Router` for the subnet-router device.
+- `README.md`: point to the web UI section.
+
 ## [1.0.2] - 2026-10-11
 
 ### Added
@@ -39,6 +48,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.0.3]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.3
 [1.0.2]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.0

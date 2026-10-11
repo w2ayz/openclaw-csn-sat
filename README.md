@@ -134,6 +134,8 @@ Deployment.md       network topologies for reaching the S.A.T. from OpenClaw, an
 See [Deployment.md](Deployment.md) if OpenClaw doesn't run on the same network as the
 S.A.T. — it covers running on the same LAN, reaching it through a Tailscale subnet
 router or SSH tunnel, and the security considerations for each.
+It also explains how to open the S.A.T.'s own web UI (`http://<SAT_LAN_IP>/`) in a
+browser, including over Tailscale.
 
 ## License
 
