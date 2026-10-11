@@ -83,6 +83,22 @@ This skill moves real hardware. The skill instructions tell the agent to:
 Simulation state **cannot be read back** from the device (its web page always shows OFF).
 Run `sim off` before reconnecting a real rotator.
 
+## TLE database
+
+The S.A.T. does not generate its own orbital data — it periodically downloads a TLE
+(Two-Line Element) file from a **SOURCE URL** you configure in the TLE/FREQ DB panel.
+The manufacturer's manual lists these known-good sources:
+
+| Source | URL | Notes |
+|---|---|---|
+| AMSAT `nasabare.txt` | `http://www.amsat.org/tle/current/nasabare.txt` | updated weekly |
+| CSN `nasabare.txt` | `http://www.csntechnologies.net/SAT/nasabare.txt` | mirror of AMSAT's file |
+| CSN `csnbare.txt` | `http://www.csntechnologies.net/SAT/csnbare.txt` | same satellite set, generated from **CelesTrak** data, updated daily |
+
+So the underlying database the box ultimately relies on is **CelesTrak** (via CSN's daily
+`csnbare.txt` mirror) or **AMSAT** (weekly). The S.A.T. only accepts plain `http://` URLs
+for the TLE source — `https://` is not supported.
+
 ## How it talks to the box
 
 The S.A.T. has no published API. These commands were taken from its web UI:

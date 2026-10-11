@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-10-11
+
+### Added
+
+- README: documented the TLE data sources behind the device's TLE/FREQ DB
+  SOURCE URL field — AMSAT's weekly `nasabare.txt`, CSN's mirror of it, and
+  CSN's `csnbare.txt` (CelesTrak-derived, updated daily) — and noted the
+  device only accepts plain `http://` URLs.
+
 ## [1.0.0] - 2026-10-02
 
 ### Added
@@ -19,4 +28,5 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.0.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.0
