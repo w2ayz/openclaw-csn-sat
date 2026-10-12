@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-10-11
+
+### Added
+
+- `setup.py`: type `b` (or `back`) at any prompt, including the final save confirmation,
+  to return to the start menu. Saving now happens inside the menu loop, so backing out
+  never saves.
+- `Deployment.md`: each topology section (§1–§4) now says which wizard option sets it up and
+  which steps remain manual. The Quick setup section explains `b`.
+- `README.md`: mention `b` in the wizard description.
+
 ## [1.2.0] - 2026-10-11
 
 ### Added
@@ -85,6 +96,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.2.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.1
 [1.2.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.0
 [1.1.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.1.0
 [1.0.4]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.4

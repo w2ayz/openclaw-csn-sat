@@ -22,7 +22,11 @@ How does this OpenClaw host reach the S.A.T.?
   3) SSH tunnel through a device on the S.A.T.'s LAN (§3)
   4) OpenClaw installed on the LAN-local device itself (§4)
   q) Quit
+(type b at any later prompt to come back to this menu)
 ```
+
+Type `b` (or `back`) at any prompt, including the final "Save?", to return to this menu
+and start over; nothing is saved until you confirm.
 
 **Automatically detect** tries the current `CSN_SAT_HOST`, every single-host (`/32`) route
 advertised on your tailnet, and an SSH tunnel on `localhost:8080`. It keeps only addresses
@@ -41,6 +45,9 @@ survive reboots; those steps are described below.
 
 ## 1. OpenClaw on the same LAN as the S.A.T.
 
+> **Wizard:** `python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py`, option **1** (or **0** to auto-detect). It asks for the S.A.T.'s IP,
+> checks that it answers, and saves it.
+
 The simplest case: the machine running OpenClaw is already on the same local network as
 the S.A.T. (e.g. a shack computer on the home WiFi).
 
@@ -55,6 +62,11 @@ Set `CSN_SAT_HOST` to the S.A.T.'s LAN IP (or mDNS hostname, if your resolver su
 it). Nothing else is required.
 
 ## 2. OpenClaw on a different network, reached via a Tailscale subnet router
+
+> **Wizard:** `python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py`, option **2** (or **0** to auto-detect), run on the **OpenClaw host**.
+> It lists the `/32` routes advertised on your tailnet, offers to enable
+> `--accept-routes` if this host ignores them, and saves the S.A.T.'s LAN IP. You still do
+> the router-side setup and the admin-console approval below yourself.
 
 If OpenClaw runs somewhere that is **not** on the S.A.T.'s LAN — a cloud box, your main
 desktop on a different network, etc. — but you have a small always-on device (a
@@ -114,6 +126,10 @@ every other thing sitting on that LAN.
 
 ## 3. OpenClaw on a different network, reached via SSH tunnel
 
+> **Wizard:** `python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py`, option **3**. It asks for the local port, the SSH login of the
+> LAN-local device and the S.A.T.'s IP, can start the tunnel for you, and saves
+> `localhost:<port>`. Making the tunnel survive reboots (below) is still up to you.
+
 If you don't have (or don't want) Tailscale subnet-route approval rights, an SSH local
 port-forward through the LAN-local device works as a fallback, at the cost of needing a
 persistent tunnel process:
@@ -134,6 +150,9 @@ LaunchAgent/systemd unit) to survive reboots and reconnects — the subnet-route
 in §2 is generally less fragile since Tailscale's own daemon handles reconnection.
 
 ## 4. OpenClaw running directly on the LAN-local device
+
+> **Wizard:** `python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py`, option **4** (or **0** to auto-detect), run on that device. To the
+> skill this is the same as §1: it asks for the S.A.T.'s IP, checks it and saves it.
 
 You *can* install OpenClaw and this skill directly on the device sitting on the S.A.T.'s
 LAN, collapsing the whole path into one host. This avoids any routing setup, but puts

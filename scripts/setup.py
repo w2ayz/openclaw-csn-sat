@@ -29,6 +29,13 @@ TOPOLOGIES = {
 }
 
 
+BACK = {"b", "back"}
+
+
+class BackToMenu(Exception):
+    """Raised when the user types b/back at any prompt."""
+
+
 def say(msg=""):
     print(msg, flush=True)
 
@@ -41,6 +48,8 @@ def ask(prompt, default=""):
         reply = input(f"{prompt}{hint}: ").strip()
     except EOFError:
         return default
+    if reply.lower() in BACK:
+        raise BackToMenu
     return reply or default
 
 
@@ -298,6 +307,7 @@ def menu():
     for i, k in enumerate(keys, 1):
         say(f"  {i}) {TOPOLOGIES[k]}")
     say("  q) Quit")
+    say("(type b at any later prompt to come back to this menu)")
     pick = ask("Choose", "0").lower()
     if pick == "q":
         return "quit"
@@ -327,23 +337,26 @@ def main(argv=None):
 
     choice = a.topology or ("auto" if a.auto or not sys.stdin.isatty() else None)
     while True:
-        choice = choice or menu()
-        if choice == "quit":
-            return 1
-        say()
-        host = auto_detect(current) if choice == "auto" else FLOWS[choice](current)
-        if host:
-            break
+        try:
+            choice = choice or menu()
+            if choice == "quit":
+                return 1
+            say()
+            host = auto_detect(current) if choice == "auto" else FLOWS[choice](current)
+            if host:
+                if host == current:
+                    say("CSN_SAT_HOST is already set to that. Nothing to change.")
+                else:
+                    save_host(host, a.yes)
+                return 0
+        except BackToMenu:
+            say("\nBack to the start.\n")
+            choice = None
+            continue
         if a.auto or a.topology or not sys.stdin.isatty():
             return 1
         say()
         choice = None
-
-    if host == current:
-        say("CSN_SAT_HOST is already set to that. Nothing to change.")
-    else:
-        save_host(host, a.yes)
-    return 0
 
 
 if __name__ == "__main__":
