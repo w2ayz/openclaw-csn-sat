@@ -26,7 +26,9 @@ How does this OpenClaw host reach the S.A.T.?
 ```
 
 Type `b` (or `back`) at any prompt, including the final "Save?", to return to this menu
-and start over; nothing is saved until you confirm.
+and start over; nothing is saved until you confirm. If the wizard started an SSH tunnel
+(option 3), going back, pressing Ctrl-C or a tunnel that can't reach the S.A.T. stops that
+tunnel again. Tunnels you started yourself are never touched.
 
 **Automatically detect** tries the current `CSN_SAT_HOST`, every single-host (`/32`) route
 advertised on your tailnet, and an SSH tunnel on `localhost:8080`. It keeps only addresses
@@ -128,7 +130,9 @@ every other thing sitting on that LAN.
 
 > **Wizard:** `python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py`, option **3**. It asks for the local port, the SSH login of the
 > LAN-local device and the S.A.T.'s IP, can start the tunnel for you, and saves
-> `localhost:<port>`. Making the tunnel survive reboots (below) is still up to you.
+> `localhost:<port>`. It prints the command to stop the tunnel, and stops it itself if
+> you go back (`b`) or the S.A.T. doesn't answer through it. Making the tunnel survive
+> reboots (below) is still up to you.
 
 If you don't have (or don't want) Tailscale subnet-route approval rights, an SSH local
 port-forward through the LAN-local device works as a fallback, at the cost of needing a

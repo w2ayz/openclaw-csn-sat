@@ -36,7 +36,8 @@ The wizard opens with a menu: **Automatically detect**, or pick one of the netwo
 in [Deployment.md](Deployment.md) (same LAN, Tailscale subnet router, SSH tunnel, OpenClaw on
 the LAN-local device). It finds the S.A.T., checks that it answers, and saves its address.
 It asks before it changes anything (Tailscale settings, starting an SSH tunnel, the
-OpenClaw config). Type `b` at any prompt to go back to the menu and start over.
+OpenClaw config). Type `b` at any prompt to go back to the menu and start over (an SSH tunnel the
+wizard started is stopped when you do).
 `setup.py --check` only reports what it finds; `--auto` skips the menu.
 
 Start a new session (`/new`) and ask things like:

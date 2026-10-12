@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] - 2026-10-11
+
+### Changed
+
+- `setup.py`: the SSH tunnel the wizard starts (option 3) now has an ssh control socket, so
+  the wizard stops exactly that tunnel when you go back (`b`), press Ctrl-C, or the S.A.T.
+  doesn't answer through it. Tunnels you started yourself are left alone. After a
+  successful start it prints the command to stop the tunnel.
+- `setup.py`: waits up to ~5 s for a freshly started tunnel before declaring it unreachable.
+- `Deployment.md`, `README.md`: document the above.
+
 ## [1.2.1] - 2026-10-11
 
 ### Added
@@ -96,6 +107,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.2.2]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.2
 [1.2.1]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.1
 [1.2.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.0
 [1.1.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.1.0

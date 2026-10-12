@@ -13,6 +13,8 @@ import shutil
 import socket
 import subprocess
 import sys
+import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from satctl import Sat, SatError, __version__, check_host
@@ -203,6 +205,29 @@ def flow_tailscale(default):
     return None
 
 
+_tunnels = []  # (control socket, ssh login) of tunnels this run started
+
+
+def start_tunnel(port, sat_ip, jump):
+    # -M/-S give the backgrounded ssh a control socket, so we can stop exactly this
+    # tunnel later (ssh -O exit) without touching any tunnel the user started.
+    sock = os.path.join(tempfile.gettempdir(), f"csn-sat-tunnel-{port}.sock")
+    cmd = ["ssh", "-f", "-N", "-M", "-S", sock, "-o", "ExitOnForwardFailure=yes",
+           "-L", f"{port}:{sat_ip}:80", jump]
+    if (confirm(f"  Start the tunnel now? (runs: {' '.join(cmd)})", default=True)
+            and subprocess.run(cmd, check=False).returncode == 0):
+        _tunnels.append((sock, jump))
+        return True
+    return False
+
+
+def stop_tunnels():
+    while _tunnels:
+        sock, jump = _tunnels.pop()
+        subprocess.run(["ssh", "-S", sock, "-O", "exit", jump], capture_output=True, check=False)
+        say(f"  Stopped the SSH tunnel through {jump}.")
+
+
 def flow_ssh(default):
     port = ask("Local port for the tunnel", default.rsplit(":", 1)[1] if default and is_loopback(default) and ":" in default else "8080")
     host = f"localhost:{port}"
@@ -213,11 +238,17 @@ def flow_ssh(default):
     sat_ip = ask("S.A.T. LAN IP, as seen from that device")
     if not jump or not sat_ip:
         return None
-    cmd = ["ssh", "-f", "-N", "-o", "ExitOnForwardFailure=yes", "-L", f"{port}:{sat_ip}:80", jump]
-    if confirm(f"  Start the tunnel now? (runs: {' '.join(cmd)})", default=True):
-        subprocess.run(cmd, check=False)
+    if start_tunnel(port, sat_ip, jump):
+        for _ in range(5):  # give a fresh tunnel a few seconds before the first probe
+            if probe(host):
+                break
+            time.sleep(1)
     if not verify(host):
+        stop_tunnels()  # a tunnel that doesn't reach the S.A.T. is no use
         return None
+    if _tunnels:
+        sock, _ = _tunnels[-1]
+        say(f"  Tunnel running in the background. Stop it with: ssh -S {sock} -O exit {jump}")
     say("  The tunnel won't survive a reboot or a dropped connection. Keep it alive with")
     say(f"  autossh -M 0 -N -L {port}:{sat_ip}:80 {jump}  under systemd or launchd (Deployment.md §3).")
     return host
@@ -350,6 +381,7 @@ def main(argv=None):
                     save_host(host, a.yes)
                 return 0
         except BackToMenu:
+            stop_tunnels()
             say("\nBack to the start.\n")
             choice = None
             continue
@@ -364,4 +396,5 @@ if __name__ == "__main__":
         sys.exit(main())
     except KeyboardInterrupt:
         say()
+        stop_tunnels()
         sys.exit(130)
