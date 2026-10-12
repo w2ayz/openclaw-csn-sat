@@ -4,6 +4,24 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-10-11
+
+### Added
+
+- `scripts/setup.py`: deployment wizard. Its menu offers **Automatically detect** or one of
+  the four Deployment.md setups (same LAN, Tailscale subnet router, SSH tunnel, OpenClaw on
+  the LAN-local device). It checks that the address answers like an S.A.T., offers to enable
+  Tailscale `--accept-routes` or start the SSH tunnel, and saves `CSN_SAT_HOST`, asking first
+  each time. `--check` is read-only; `--auto`, `--topology` and `--yes` skip the prompts.
+- `SKILL.md`: when the S.A.T. is unreachable, the agent runs `setup.py --check` and reports.
+
+### Changed
+
+- `passes`: by default shows the S.A.T.'s whole forecast (it only predicts a few hours ahead)
+  instead of a 12 h window. `--hours` now only narrows it, and the "no passes" message names
+  the window the S.A.T. actually covered rather than claiming e.g. "none in the next 24 h".
+- `SKILL.md`: don't tell users a satellite has no passes "today" from that short forecast.
+
 ## [1.1.0] - 2026-10-11
 
 ### Added
@@ -67,6 +85,7 @@ project uses [Semantic Versioning](https://semver.org/).
 - Request pacing and retry for the device's embedded web server.
 - Agent safety rules: move only on explicit request; simulation state is write-only.
 
+[1.2.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.2.0
 [1.1.0]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.1.0
 [1.0.4]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.4
 [1.0.3]: https://github.com/w2ayz/openclaw-csn-sat/releases/tag/v1.0.3

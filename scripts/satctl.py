@@ -14,7 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 AZ_RANGE = (0.0, 450.0)  # Yaesu G-5500 class rotators allow 450 deg azimuth
 EL_RANGE = (0.0, 180.0)
@@ -168,11 +168,12 @@ def resolve_sat(sat, query):
 
 
 def collect_passes(rows, hours, min_el, now=None):
+    # hours=None keeps everything the S.A.T. forecast (it only looks a few hours ahead).
     now = time.time() if now is None else now
     out = []
     for r in rows:
         aos, los, max_el = r[2], r[3], r[7]
-        if los < now or aos > now + hours * 3600 or max_el < min_el:
+        if los < now or (hours is not None and aos > now + hours * 3600) or max_el < min_el:
             continue
         out.append({
             "name": r[1], "catno": r[9],
@@ -224,7 +225,9 @@ def main(argv=None):
     ps = command("passes", "upcoming passes (read-only, same data as NEXT PASSES in the web UI)")
     ps.add_argument("satellite", nargs="*",
                     help="satellite names or catalog numbers (default: the S.A.T.'s favorites)")
-    ps.add_argument("--hours", type=float, default=12.0, help="look-ahead window (default 12)")
+    ps.add_argument("--hours", type=float, default=None,
+                    help="only passes starting within N hours (default: the S.A.T.'s whole "
+                         "forecast, which covers just the next few hours)")
     ps.add_argument("--min-el", type=float, default=0.0, help="hide passes below this max elevation")
     ps.add_argument("--limit", type=int, default=20, help="most passes to list (default 20)")
     m = command("sim", "turn rotator simulation on/off (state is not readable back)")
@@ -299,16 +302,26 @@ def main(argv=None):
             ids = sat.favorites()
         if not ids:
             raise SatError("no satellites given and the S.A.T. has no favorites; name some")
-        rows = collect_passes(sat.future(ids), a.hours, a.min_el)[:max(a.limit, 0)]
+        raw = sat.future(ids)
+        rows = collect_passes(raw, a.hours, a.min_el)[:max(a.limit, 0)]
+        # The box decides how far ahead it predicts; report what it covered rather
+        # than implying "none in the next N hours" beyond its forecast.
+        reach = (max(r[3] for r in raw) - time.time()) / 3600 if raw else None
+        span = f"the S.A.T.'s forecast (through about {reach:.0f} h from now)" if reach and reach >= 1 \
+            else "the S.A.T.'s forecast, which covers only the next few hours"
+        if a.hours is not None:
+            span = f"the next {a.hours:g} h" if reach and reach >= a.hours else span
         if a.json:
             print(json.dumps(rows))
         elif not rows:
-            print(f"No passes in the next {a.hours:g} h")
+            print(f"No passes in {span}")
         else:
             for x in rows:
                 now = "  (in progress)" if x["in_progress"] else ""
                 print(f"{x['name']:<10} AOS {x['aos_local']}  LOS {x['los_local']}  dur {x['duration']}  "
                       f"max EL {x['max_el']:.1f}  AZ {x['aos_az']:.0f}->{x['los_az']:.0f}{now}")
+            if a.hours is None:
+                print("(the S.A.T. forecasts only the next few hours; ask again later for further passes)")
 
     elif a.action == "sim":
         sat.cmd("Z|X|" + ("1" if a.state == "on" else "0"))

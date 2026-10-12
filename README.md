@@ -23,13 +23,20 @@ satellite tracker, park or stop it, and switch rotator simulation on or off.
 # 1. Install the skill into your agent workspace
 openclaw skills install git:w2ayz/openclaw-csn-sat
 
-# 2. Tell it where the S.A.T. lives
-echo '{ skills: { entries: { "csn-sat": { env: { CSN_SAT_HOST: "192.168.x.x" } } } } }' \
-  | openclaw config patch --stdin
+# 2. Tell it where the S.A.T. lives: run the setup wizard...
+python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py
+#    ...or set the address yourself
+openclaw config set skills.entries.csn-sat.env.CSN_SAT_HOST 192.168.x.x
 
 # 3. Confirm it loaded
 openclaw skills list | grep csn-sat
 ```
+
+The wizard opens with a menu: **Automatically detect**, or pick one of the network setups
+in [Deployment.md](Deployment.md) (same LAN, Tailscale subnet router, SSH tunnel, OpenClaw on
+the LAN-local device). It finds the S.A.T., checks that it answers, and saves its address.
+It asks before it changes anything (Tailscale settings, starting an SSH tunnel, the
+OpenClaw config). `setup.py --check` only reports what it finds; `--auto` skips the menu.
 
 Start a new session (`/new`) and ask things like:
 
@@ -50,7 +57,7 @@ export CSN_SAT_HOST=192.168.x.x        # or pass --host on each call
 
 scripts/satctl.py status               # position, tracking state, next pass
 scripts/satctl.py passes               # upcoming passes of the favorites (read-only)
-scripts/satctl.py passes ISS --hours 24 --min-el 10
+scripts/satctl.py passes ISS --min-el 10
 scripts/satctl.py goto 180 30 --wait   # point and wait until the rotator settles
 scripts/satctl.py track ISS            # satellite name or NORAD catalog number
 scripts/satctl.py sats SO-             # list loaded satellites, optional filter
@@ -65,6 +72,11 @@ scripts/satctl.py --version
 button in its web UI (`GET /future?a=;<catalog no.>;...`) and never moves the antenna. With no
 satellite named it uses the favorites configured on the S.A.T. Times are shown in the local
 timezone of the machine running the CLI.
+
+The S.A.T. only forecasts the next few hours (about 8 h for a typical favorites list), which
+covers the passes you can actually work soon. `passes` shows that whole forecast by default;
+`--hours N` narrows it. It never reports "no passes" for a window longer than the S.A.T.
+actually predicted.
 
 Add `--json` to any command for machine-readable output. Errors go to stderr with
 exit code 1.
@@ -137,6 +149,7 @@ Notes:
 ```text
 SKILL.md            OpenClaw skill definition (frontmatter + agent instructions)
 scripts/satctl.py   CLI used by the skill
+scripts/setup.py    deployment wizard: detects the network path and sets CSN_SAT_HOST
 CHANGELOG.md        release history
 Deployment.md       network topologies for reaching the S.A.T. from OpenClaw, and security notes
 ```

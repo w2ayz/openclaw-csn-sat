@@ -6,6 +6,39 @@ anything that can reach its IP on port 80 can move the antenna. This skill (and 
 that IP. How you build that path depends on where OpenClaw runs relative to the S.A.T.'s
 LAN. This doc lays out the common topologies.
 
+## Quick setup
+
+The skill ships a wizard that walks through the setups below:
+
+```bash
+python3 ~/.openclaw/workspace/skills/csn-sat/scripts/setup.py
+```
+
+```text
+How does this OpenClaw host reach the S.A.T.?
+  0) Automatically detect (recommended)
+  1) Same LAN: OpenClaw runs on the S.A.T.'s network (Deployment.md §1)
+  2) Tailscale subnet router: another device on the S.A.T.'s LAN advertises a route (§2)
+  3) SSH tunnel through a device on the S.A.T.'s LAN (§3)
+  4) OpenClaw installed on the LAN-local device itself (§4)
+  q) Quit
+```
+
+**Automatically detect** tries the current `CSN_SAT_HOST`, every single-host (`/32`) route
+advertised on your tailnet, and an SSH tunnel on `localhost:8080`. It keeps only addresses
+that answer like an S.A.T. and tells you which setup it found. If a tailnet route exists but
+this host ignores subnet routes, it offers to run `sudo tailscale set --accept-routes`. The
+specific options ask for what each setup needs (IP, route, SSH login), and option 3 can start
+the tunnel for you. The wizard asks before every change and finally saves `CSN_SAT_HOST`.
+
+- `--check`: detect and report only, change nothing (the agent uses this when the S.A.T.
+  is unreachable).
+- `--auto`: skip the menu. `--topology lan|tailscale|ssh|local`: go straight to one setup.
+- `--yes`: save the detected address without asking (never implies `sudo` or `ssh`).
+
+The wizard can't approve a subnet route in the Tailscale admin console or make an SSH tunnel
+survive reboots; those steps are described below.
+
 ## 1. OpenClaw on the same LAN as the S.A.T.
 
 The simplest case: the machine running OpenClaw is already on the same local network as
